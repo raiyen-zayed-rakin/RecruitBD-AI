@@ -147,7 +147,7 @@ async def main():
                 if len(retry_ids) == 0:
                     break
                 batch_ids = retry_ids[:batch_size]
-                retry_ids.clear()
+                del retry_ids[:batch_size]
                 detail_tasks = [process_job(session, job_id) for job_id in batch_ids]
                 details = await asyncio.gather(*detail_tasks)
                 jobs_data.extend([detail for detail in details if detail])
