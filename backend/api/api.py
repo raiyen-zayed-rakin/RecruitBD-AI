@@ -42,8 +42,8 @@ async def lifespan(app: FastAPI):
         print("⚙️  Index not found. Building…")
         await build_index()
 
-    print("⚙️  Loading SBERT model (all-MiniLM-L6-v2)…")
-    _model = SentenceTransformer("all-MiniLM-L6-v2")
+    print("⚙️  Loading SBERT model (paraphrase-multilingual-MiniLM-L12-v2)…")
+    _model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
     print(f"⚙️  Loading job index from {INDEX_DIR}…")
     _job_embeddings = np.load(EMB_PATH)

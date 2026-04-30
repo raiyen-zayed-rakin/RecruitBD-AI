@@ -4,26 +4,14 @@ import sys
 
 import docx
 import pdfplumber
+from google import genai
+from google.genai import types
 from ollama import chat
+from dotenv import load_dotenv
 
-MODEL = "gemma3"
+load_dotenv()
 
-
-def extract_text(filepath):
-    """Extract text from PDF or DOCX files."""
-    if filepath.endswith(".pdf"):
-        with pdfplumber.open(filepath) as pdf:
-            return "\n".join(page.extract_text() for page in pdf.pages)
-    elif filepath.endswith(".docx"):
-        doc = docx.Document(filepath)
-        return "\n".join(p.text for p in doc.paragraphs)
-    else:
-        return None
-
-
-def parse_cv(text) -> dict:
-    """Parse CV text into structured JSON according to the defined schema."""
-    prompt = f"""
+PROMPT_TEMPLATE = """
 You are a strict JSON generator. Your task is to extract information from a CV.
 
 RULES (MUST FOLLOW):
@@ -120,7 +108,7 @@ def parse_cv_ollama(text) -> dict:
     prompt = PROMPT_TEMPLATE.format(text=text)
 
     response = chat(
-        model=MODEL,
+        model="gemma3",
         messages=[
             {
                 "role": "system",
@@ -131,6 +119,7 @@ def parse_cv_ollama(text) -> dict:
         format="json",
         think=False,
         options={
+            "num_ctx": 2048,
             "temperature": 0,
             "top_p": 1,
             "top_k": 1,
@@ -145,6 +134,30 @@ def parse_cv_ollama(text) -> dict:
         raise ValueError("Model response is empty.")
 
     return json.loads(raw.strip())
+
+
+def parse_cv_genai(text) -> dict:
+    """Parse CV text using GenAI's structured output capabilities."""
+    prompt = PROMPT_TEMPLATE.format(text=text)
+    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+    model = "gemini-2.5-flash"
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0),
+    )
+
+    raw = response.text
+    if raw is None:
+        raise ValueError("Model response is empty.")
+    return json.loads(raw.strip())
+
+
+def parse_cv(text) -> dict:
+    """Parse CV text into structured JSON. Uses GenAI if GOOGLE_API_KEY is set, otherwise Ollama."""
+    if os.getenv("GOOGLE_API_KEY"):
+        return parse_cv_genai(text)
+    return parse_cv_ollama(text)
 
 
 def main():

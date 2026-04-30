@@ -13,7 +13,6 @@ import asyncio
 import csv
 import json
 import re
-from pathlib import Path
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -139,6 +138,7 @@ def build_job_text(job):
     parts = [
         job.get("job_title", ""),
         job.get("job_description", "")[:600],
+        job.get("additional_requirements", "")[:300],
         job.get("skills_required", ""),
         job.get("education_requirements", "")[:100],
     ]
@@ -163,7 +163,7 @@ def main(output_prefix: str = "job_index"):
 
     print(f"Jobs loaded: {len(jobs)}")
     print("Loading Sentence-BERT model...")
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
     # Build metadata for each job (pre-extracted fields)
     print("Extracting job metadata...")
@@ -179,6 +179,8 @@ def main(output_prefix: str = "job_index"):
         meta = {
             "job_id": job.get("job_id"),
             "job_title": job_title,
+            "job_workplace": job.get("job_workplace", ""),
+            "job_nature": job.get("job_nature", ""),
             "company": job.get("company_name"),
             "location": job.get("location"),
             "salary_range": job.get("salary_range"),
@@ -187,7 +189,7 @@ def main(output_prefix: str = "job_index"):
             "education_requirements": job_edu,
             "job_description": job_desc[:800],
             # Pre-extracted fields
-            "extracted_skills": extract_skills_from_desc(job_desc),
+            "extracted_skills": extract_skills_from_desc(job_desc + " " + job_add),
             "required_years": extract_required_years(job_desc + " " + job_add, job_edu),
             "seniority_level": detect_seniority(job_title + " " + job_desc[:200]),
         }
@@ -213,9 +215,9 @@ def main(output_prefix: str = "job_index"):
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, ensure_ascii=False)
 
-    print("\n✅ Index built successfully!")
-    print(f"   Embeddings → {emb_path}  ({embeddings.shape})")
-    print(f"   Metadata   → {meta_path}  ({len(metadata)} jobs)")
+    print("\n[SUCCESS] Index built successfully!")
+    print(f"   Embeddings -> {emb_path}  ({embeddings.shape})")
+    print(f"   Metadata   -> {meta_path}  ({len(metadata)} jobs)")
     print(f"\nNow run cv_matcher.py with --index {output_prefix}")
 
 
