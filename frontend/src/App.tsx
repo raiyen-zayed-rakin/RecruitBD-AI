@@ -8,7 +8,7 @@ import { matchJobs, parseCV } from "@/lib/api";
 import { DEMO_CV, DEMO_MATCHES } from "@/lib/demo";
 import { appReducer, INITIAL_STATE } from "@/lib/reducer";
 import { VIEWS } from "@/lib/types";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 const PARSE_STEPS = 5;
 const MATCH_STEPS = 5;
@@ -66,7 +66,7 @@ export default function App() {
       clearTimer();
       dispatch({
         type: "SET_UPLOAD_ERROR",
-        payload: `Parse failed: ${(err as Error).message}. Make sure the FastAPI server is running on port 8000.`,
+        payload: `Parse failed: ${(err as Error).message}. Make sure the FastAPI server is running.`,
       });
     }
   }, [state.isDemo, state.file, runStepAnim]);
@@ -90,7 +90,7 @@ export default function App() {
       clearTimer();
       dispatch({
         type: "MATCH_ERROR",
-        payload: `Matching failed: ${(err as Error).message}. Make sure the FastAPI server is running on port 8000.`,
+        payload: `Match failed: ${(err as Error).message}. Make sure the FastAPI server is running.`,
       });
     }
   }, [state.isDemo, state.cvData, state.topN, runStepAnim]);
@@ -139,6 +139,7 @@ export default function App() {
           <ProfileView
             cv={state.cvData}
             topN={state.topN}
+            error={state.error}
             dispatch={dispatch}
             onMatch={handleMatch}
             onBack={handleBack}
@@ -163,16 +164,16 @@ export default function App() {
   );
 }
 
-function Footer() {
+const Footer = React.memo(function Footer() {
   return (
-    <footer className="border-border bg-background border-t py-12">
+    <footer className="border-border bg-background border-t py-6">
       <div className="mx-auto flex max-w-245 flex-col justify-between gap-8 px-6 md:flex-row">
         <div className="flex max-w-sm flex-col gap-4">
           <div className="font-serif text-xl font-medium">
             recruit<span className="text-primary font-serif">.</span>
           </div>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            AI-powered recruitment and CV parsing platform to help you find the perfect matches.
+            AI-powered recruitment and CV parsing platform to help you find the perfect job matches.
           </p>
         </div>
         <div>
@@ -208,10 +209,25 @@ function Footer() {
                 Raiyen
               </span>
             </a>
+            <a
+              href="https://github.com/abdulbarikyieash"
+              target="_blank"
+              rel="noreferrer"
+              className="group flex w-fit items-center gap-3"
+            >
+              <img
+                className="border-border bg-muted group-hover:border-primary inline-block h-8 w-8 rounded-full border-2 object-cover transition-transform group-hover:scale-110"
+                src="https://github.com/abdulbarikyieash.png"
+                alt="Abdul Bari Kyieash"
+              />
+              <span className="text-muted-foreground group-hover:text-foreground text-sm transition-colors">
+                Abdul
+              </span>
+            </a>
           </div>
         </div>
       </div>
-      <div className="border-border text-muted-foreground mx-auto mt-12 max-w-245 border-t px-6 pt-8 text-center text-sm md:flex md:justify-between md:text-left">
+      <div className="border-border text-muted-foreground mx-auto mt-6 max-w-245 border-t px-6 pt-6 text-center text-sm md:flex md:justify-between md:text-left">
         <p>&copy; {new Date().getFullYear()} RecruitBD. All rights reserved.</p>
         <div className="mt-4 flex justify-center gap-6 md:mt-0">
           <a href="#" className="hover:text-foreground transition-colors">
@@ -230,4 +246,4 @@ function Footer() {
       </div>
     </footer>
   );
-}
+});

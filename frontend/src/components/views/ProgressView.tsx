@@ -34,7 +34,7 @@ export function ProgressView({ type, step }: ProgressViewProps) {
       {/* Header */}
       <div className="mb-10 text-center">
         {/* Spinner */}
-        <div className="border-primary mx-auto mb-5 h-14 w-14 animate-spin rounded-full border-2 border-t-transparent"></div>
+        <div className="border-primary mx-auto mb-5 h-14 w-14 animate-spin rounded-full border-4 border-t-transparent drop-shadow-[0_0_10px]" />
         <h2 className="mb-1.5 font-serif text-[26px]">
           {label}
           <em className="text-primary">…</em>

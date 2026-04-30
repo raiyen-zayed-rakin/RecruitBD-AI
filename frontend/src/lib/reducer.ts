@@ -50,7 +50,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         error: null,
       };
     case "SET_UPLOAD_ERROR":
-      return { ...state, error: action.payload };
+      return { ...state, view: "upload", error: action.payload };
 
     // Parse
     case "START_PARSING":

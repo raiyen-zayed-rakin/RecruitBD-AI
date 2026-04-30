@@ -6,12 +6,20 @@ import { Separator } from "@/components/ui/separator";
 import type { AppAction } from "@/lib/reducer";
 import type { CVData } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ArrowLeftIcon, ArrowRightIcon, BriefcaseIcon, DotIcon, MinusIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  BadgeAlertIcon,
+  BriefcaseIcon,
+  DotIcon,
+  MinusIcon,
+} from "lucide-react";
 import type React from "react";
 
 interface ProfileViewProps {
   cv: CVData;
   topN: number;
+  error: string | null;
   dispatch: React.Dispatch<AppAction>;
   onMatch: () => void;
   onBack: () => void;
@@ -51,7 +59,7 @@ const CORE_SKILLS = new Set([
   "linux",
 ]);
 
-export function ProfileView({ cv, topN, dispatch, onMatch, onBack }: ProfileViewProps) {
+export function ProfileView({ cv, topN, error, dispatch, onMatch, onBack }: ProfileViewProps) {
   const initials = (cv.name || "CV")
     .split(" ")
     .map((s) => s[0])
@@ -93,6 +101,13 @@ export function ProfileView({ cv, topN, dispatch, onMatch, onBack }: ProfileView
           </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="text-destructive bg-destructive/10 mb-6 flex items-center justify-center gap-2 rounded-md border p-3 text-[15px]">
+          <BadgeAlertIcon size={18} />
+          {error}
+        </div>
+      )}
 
       {cv.summary !== "" && (
         <Card className="mb-4 gap-2 p-5">

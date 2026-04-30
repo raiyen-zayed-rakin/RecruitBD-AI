@@ -21,7 +21,6 @@ import {
   BriefcaseIcon,
   CalendarIcon,
   ChevronDownIcon,
-  ChevronUpIcon,
   ExternalLinkIcon,
   FrownIcon,
   ListIcon,
@@ -42,27 +41,6 @@ interface ResultsViewProps {
   dispatch: React.Dispatch<AppAction>;
   onBack: () => void;
   onRestart: () => void;
-}
-
-const sortItems = [
-  { label: "Match score", value: "score" },
-  { label: "Skill match", value: "skill" },
-  { label: "Experience", value: "exp" },
-  { label: "Education", value: "edu" },
-];
-
-function sortMatches(matches: JobMatch[], sortBy: AppState["sortBy"]): JobMatch[] {
-  const copy = [...matches];
-  if (sortBy === "score") copy.sort((a, b) => b.final_score - a.final_score);
-  else if (sortBy === "skill")
-    copy.sort((a, b) => (b.breakdown?.skill_match ?? 0) - (a.breakdown?.skill_match ?? 0));
-  else if (sortBy === "exp")
-    copy.sort(
-      (a, b) => (b.breakdown?.experience_match ?? 0) - (a.breakdown?.experience_match ?? 0),
-    );
-  else if (sortBy === "edu")
-    copy.sort((a, b) => (b.breakdown?.education_match ?? 0) - (a.breakdown?.education_match ?? 0));
-  return copy;
 }
 
 export function ResultsView({
@@ -162,30 +140,51 @@ function StatCards({
   const statItems = [
     {
       label: "Jobs scanned",
-      val: matches.length.toLocaleString(),
+      value: matches.length.toLocaleString(),
       accent: false,
       icon: ListIcon,
     },
-    { label: "Top match", val: `${topScore}%`, accent: true, icon: SparklesIcon },
-    { label: "Average score", val: `${avgScore}%`, accent: false, icon: TrendingUpIcon },
-    { label: "Showing", val: String(filtered.length), accent: false, icon: BriefcaseIcon },
+    { label: "Top match", value: `${topScore}%`, accent: true, icon: SparklesIcon },
+    { label: "Average score", value: `${avgScore}%`, accent: false, icon: TrendingUpIcon },
+    { label: "Showing", value: String(filtered.length), accent: false, icon: BriefcaseIcon },
   ];
 
   return (
     <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {statItems.map(({ label, val, accent, icon: Icon }) => (
+      {statItems.map(({ label, value, accent, icon: Icon }) => (
         <Card key={label} className="flex flex-row items-center justify-between gap-1 px-4 py-4">
           <div>
             <div className="text-muted-foreground mb-1.5 text-[11px] tracking-wider uppercase">
               {label}
             </div>
-            <h2 className={cn("text-2xl font-semibold", accent ? "text-primary" : "")}>{val}</h2>
+            <h2 className={cn("text-2xl font-semibold", accent ? "text-primary" : "")}>{value}</h2>
           </div>
           <Icon className="text-muted-foreground" />
         </Card>
       ))}
     </div>
   );
+}
+
+const sortItems = [
+  { label: "Match score", value: "score" },
+  { label: "Skill match", value: "skill" },
+  { label: "Experience", value: "exp" },
+  { label: "Education", value: "edu" },
+];
+
+function sortMatches(matches: JobMatch[], sortBy: AppState["sortBy"]): JobMatch[] {
+  const copy = [...matches];
+  if (sortBy === "score") copy.sort((a, b) => b.final_score - a.final_score);
+  else if (sortBy === "skill")
+    copy.sort((a, b) => (b.breakdown?.skill_match ?? 0) - (a.breakdown?.skill_match ?? 0));
+  else if (sortBy === "exp")
+    copy.sort(
+      (a, b) => (b.breakdown?.experience_match ?? 0) - (a.breakdown?.experience_match ?? 0),
+    );
+  else if (sortBy === "edu")
+    copy.sort((a, b) => (b.breakdown?.education_match ?? 0) - (a.breakdown?.education_match ?? 0));
+  return copy;
 }
 
 function Controls({
@@ -243,7 +242,7 @@ function Controls({
           </Select>
         </div>
       </div>
-      <div className="text-muted-foreground mb-1.5 text-[11px] tracking-widest uppercase">
+      <div className="text-muted-foreground mb-1.5 self-end text-[11px] tracking-widest uppercase">
         {filtered.length} / {matches.length} results
       </div>
     </div>
@@ -252,7 +251,6 @@ function Controls({
 
 function JobCard({ job, rank }: { job: JobMatch; rank: number }) {
   const [expanded, setExpanded] = useState(false);
-  const breakdown = job.breakdown;
 
   const score = Math.round(job.final_score);
 
@@ -263,16 +261,16 @@ function JobCard({ job, rank }: { job: JobMatch; rank: number }) {
   return (
     <Card
       className={cn(
-        "hover:border-primary/20 hover:shadow-primary border border-transparent p-0 transition-all duration-200 hover:shadow-md/30",
-        expanded ? "border-primary/20 shadow-primary shadow-md/30 transition-all" : "",
+        "hover:border-primary/20 hover:shadow-primary border border-transparent p-0 transition-all duration-200 hover:shadow-[0_0_4px]",
+        expanded ? "border-primary/20 shadow-primary shadow-[0_0_4px] transition-all" : "",
       )}
       onClick={handleCardClick}
     >
       <CardContent className="p-0">
         {/* Header Row */}
-        <div className="flex items-start gap-4 px-6 py-5">
+        <div className="flex gap-4 px-6 py-5">
           <div className="text-muted-foreground font-mono text-sm">#{rank}</div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-40 flex-1">
             <div className="mb-1 pr-20 text-[16px] leading-snug font-medium">
               {job.job_title || "Untitled role"}
               {rank === 1 && (
@@ -306,7 +304,7 @@ function JobCard({ job, rank }: { job: JobMatch; rank: number }) {
               )}
             </div>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <div className="flex shrink-0 flex-col items-end justify-between">
             <div
               className={cn(
                 "text-xl font-semibold",
@@ -316,55 +314,75 @@ function JobCard({ job, rank }: { job: JobMatch; rank: number }) {
               {score}
               <span className="text-muted-foreground text-sm">%</span>
             </div>
-            <div className="text-muted-foreground">
-              {expanded ? <ChevronUpIcon size="18" /> : <ChevronDownIcon size="18" />}
+            <div
+              className={cn(
+                "text-muted-foreground transition-transform duration-300",
+                expanded && "rotate-180",
+              )}
+            >
+              <ChevronDownIcon size="18" />
             </div>
           </div>
         </div>
 
-        {expanded && (
-          <div className="border-t px-6 py-5">
-            <div className="text-muted-foreground mb-3.5 text-[11px] font-medium tracking-wider uppercase">
-              Score breakdown
-            </div>
-            <div className="mb-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3">
-              <BreakdownBar label="Skill" value={breakdown.skill_match} />
-              <BreakdownBar label="Experience" value={breakdown.experience_match} />
-              <BreakdownBar label="Education" value={breakdown.education_match} />
-              <BreakdownBar label="Semantic" value={breakdown.semantic_match} />
-              <BreakdownBar label="Title Fit" value={breakdown.title_match} />
-              <BreakdownBar label="Skill Source" value={breakdown.skill_source} />
-            </div>
-
-            {breakdown.seniority_penalty !== undefined && (
-              <div className="text-muted-foreground mb-3 text-[11px]">
-                Seniority penalty: ×{breakdown.seniority_penalty}
-              </div>
-            )}
-
-            <Separator className="mb-3.5" />
-
-            <div className="flex items-center gap-2">
-              {job.job_id && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    window.open(`https://jobs.bdjobs.com/jobdetails?id=${job.job_id}`, "_blank")
-                  }
-                >
-                  View on BDJobs
-                  <ExternalLinkIcon />
-                </Button>
-              )}
-              <span className="text-muted-foreground ml-auto flex items-center gap-1 text-[11px]">
-                ID: {job.job_id || <MinusIcon size={14} />}
-              </span>
-            </div>
-          </div>
-        )}
+        <JobDetails job={job} expanded={expanded} />
       </CardContent>
     </Card>
+  );
+}
+
+function JobDetails({ job, expanded }: { job: JobMatch; expanded: boolean }) {
+  const breakdown = job.breakdown;
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden transition-all duration-300 ease-out",
+        expanded ? "max-h-max translate-y-2 opacity-100" : "max-h-0 translate-y-0 opacity-0",
+      )}
+    >
+      <div className="border-t px-6 py-5">
+        <div className="text-muted-foreground mb-3.5 text-[11px] font-medium tracking-wider uppercase">
+          Score breakdown
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3">
+          <BreakdownBar label="Skill" value={breakdown.skill_match} />
+          <BreakdownBar label="Experience" value={breakdown.experience_match} />
+          <BreakdownBar label="Education" value={breakdown.education_match} />
+          <BreakdownBar label="Semantic" value={breakdown.semantic_match} />
+          <BreakdownBar label="Title Fit" value={breakdown.title_match} />
+          <BreakdownBar label="Skill Source" value={breakdown.skill_source} />
+        </div>
+
+        {breakdown.seniority_penalty !== undefined && (
+          <div className="text-muted-foreground mb-3 text-[11px]">
+            Seniority penalty: ×{breakdown.seniority_penalty}
+          </div>
+        )}
+
+        <Separator className="mb-3.5" />
+
+        <div className="mb-1 flex items-center gap-2">
+          {job.job_id && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                window.open(`https://jobs.bdjobs.com/jobdetails?id=${job.job_id}`, "_blank")
+              }
+            >
+              View on BDJobs
+              <ExternalLinkIcon />
+            </Button>
+          )}
+
+          <span className="text-muted-foreground ml-auto flex items-center gap-1 text-[11px]">
+            ID: {job.job_id || <MinusIcon size={14} />}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
