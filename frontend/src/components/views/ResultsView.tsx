@@ -112,7 +112,7 @@ function Header({
     <div className="mb-6 flex flex-wrap justify-between">
       <div>
         <div className="text-muted-foreground mb-1 text-sm">Result for</div>
-        <h2 className="font-serif text-2xl leading-relaxed font-semibold tracking-wider">{name}</h2>
+        <h2 className="text-2xl leading-relaxed font-semibold">{name}</h2>
       </div>
       <div className="flex items-center gap-1">
         <Button variant="outline" size="sm" onClick={onBack}>
@@ -269,7 +269,7 @@ function JobCard({ job, rank }: { job: JobMatch; rank: number }) {
       <CardContent className="p-0">
         {/* Header Row */}
         <div className="flex gap-4 px-6 py-5">
-          <div className="text-muted-foreground font-mono text-sm">#{rank}</div>
+          <div className="text-muted-foreground font-mono text-sm font-semibold">#{rank}</div>
           <div className="min-w-40 flex-1">
             <div className="mb-1 pr-20 text-[16px] leading-snug font-medium">
               {job.job_title || "Untitled role"}

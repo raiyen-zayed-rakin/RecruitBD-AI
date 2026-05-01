@@ -3,13 +3,15 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/outfit";
 @import "@fontsource/dm-serif-display";
+@import "@fontsource-variable/anek-bangla";
+@import "@fontsource/tiro-bangla";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: "Outfit Variable", sans-serif;
-  --font-serif: "DM Serif Display", serif;
+  --font-sans: "Outfit Variable", "Anek Bangla Variable", sans-serif;
+  --font-serif: "DM Serif Display", "Tiro Bangla", serif;
   --font-mono: "DM Mono", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
