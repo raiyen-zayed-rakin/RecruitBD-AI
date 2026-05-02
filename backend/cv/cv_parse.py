@@ -53,7 +53,8 @@ SCHEMA:
       "company": "",
       "start_date": "",
       "end_date": "",
-      "description": ""
+      "description": "",
+      "tech": []
     }}
   ],
   "education": [
@@ -77,10 +78,46 @@ EXTRACTION INSTRUCTIONS:
 - For skills:
   - Extract explicit skills only (no assumptions).
 - If no experience exist, return empty list [].
+- If experience is a project, keep company as empty string and title as "[Project Name]".
 
 CV TEXT:
 {text}
 """
+
+
+def extract_text(filepath):
+    """Extract text from PDF or DOCX files."""
+    if filepath.endswith(".pdf"):
+        with pdfplumber.open(filepath) as pdf:
+            return "\n".join(page.extract_text() for page in pdf.pages)
+    elif filepath.endswith(".docx"):
+        doc = docx.Document(filepath)
+        text = []
+
+        # Extract text from paragraphs
+        for p in doc.paragraphs:
+            if p.text.strip():
+                text.append(p.text.strip())
+
+        # Extract text from tables
+        for table in doc.tables:
+            for r in table.rows:
+                row = []
+                for cell in r.cells:
+                    cell_text = cell.text.strip()
+                    if cell_text:
+                        row.append(cell_text)
+                if row:
+                    text.append(" | ".join(row))
+
+        return "\n".join(text)
+    else:
+        return None
+
+
+def parse_cv_ollama(text) -> dict:
+    """Parse CV text into structured JSON according to the defined schema using Ollama."""
+    prompt = PROMPT_TEMPLATE.format(text=text)
 
     response = chat(
         model=MODEL,

@@ -1,4 +1,3 @@
-from pathlib import Path
 import asyncio
 import csv
 from datetime import datetime
@@ -101,10 +100,10 @@ async def process_job(session, job_id):
         if detail:
             return extract_job_details(detail)
         else:
-            print(f"Failed to fetch details for job ID: {job_id}")
+            tqdm.write(f"Failed to fetch details for job ID: {job_id}")
             return None
     except Exception as e:
-        print(f"Error processing job ID {job_id}: {e}")
+        tqdm.write(f"Error processing job ID {job_id}: {e}")
         retry_ids.append(job_id)
         return None
 
@@ -121,7 +120,7 @@ async def main():
         initial = await fetch_json(session, JOB_LIST_URL)
 
         if not initial or initial.get("statuscode") != "1":
-            print("Failed to fetch job listings.")
+            tqdm.write("Failed to fetch job listings.")
             return
 
         total_pages = initial["common"]["totalpages"]
@@ -147,17 +146,15 @@ async def main():
             jobs_data.extend([detail for detail in details if detail])
 
         max_retries = 5
-        for attempt in range(max_retries):
-            if not retry_ids:
-                break
-            current_batch = retry_ids[:]
-            retry_ids.clear()
-            detail_tasks = [process_job(session, job_id) for job_id in current_batch]
-            details = await tqdm.gather(
-                *detail_tasks,
-                desc=f"Retry {attempt + 1}/{max_retries} ({len(current_batch)} jobs)",
-            )
-            jobs_data.extend([d for d in details if d])
+        while retry_ids and max_retries > 0:
+            print(f"Retrying {len(retry_ids)} failed job details...")
+            batch_ids = retry_ids[:batch_size]
+            retry_ids = retry_ids[batch_size:]
+
+            detail_tasks = [process_job(session, job_id) for job_id in batch_ids]
+            details = await asyncio.gather(*detail_tasks)
+            jobs_data.extend([detail for detail in details if detail])
+            max_retries -= 1
 
         now = datetime.now()
         timestamp = int(now.timestamp())
