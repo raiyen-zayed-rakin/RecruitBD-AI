@@ -1,5 +1,5 @@
 """
-cv_matcher.py — CV to Job Matching Engine (v5)
+cv_matcher.py — CV to Job Matching Engine (v6)
 -----------------------------------------------
 Loads precomputed job index from build_index.py for fast matching.
 Only encodes the CV — job embeddings are loaded from disk instantly.
@@ -19,6 +19,16 @@ import warnings
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
+from matcher.constants import (
+    CORE_SKILL_PATTERNS,
+    CORE_SKILLS,
+    SENIORITY_MAP,
+    SENIORITY_PATTERNS,
+    SOFT_SKILLS,
+    SYNONYM_MAP,
+    SYNONYM_PATTERNS,
+)
+
 warnings.filterwarnings("ignore")
 
 
@@ -36,224 +46,6 @@ WEIGHTS = {
 }
 
 
-# ── SKILL SYNONYMS ────────────────────────────────────────────────────────────
-
-SKILL_SYNONYMS = [
-    {"javascript", "js", "node.js", "nodejs"},
-    {"typescript", "ts"},
-    {"python", "py"},
-    {"java", "core java"},
-    {"c++", "cpp"},
-    {"c#", "csharp"},
-    {"machine learning", "ml"},
-    {"deep learning", "dl"},
-    {"natural language processing", "nlp"},
-    {"computer vision", "cv"},
-    {"artificial intelligence", "ai"},
-    {"sql", "mysql", "postgresql", "postgres", "oracle sql"},
-    {"mongodb", "mongo"},
-    {"react", "react.js", "reactjs"},
-    {"vue", "vue.js", "vuejs"},
-    {"angular", "angularjs"},
-    {"flutter", "dart"},
-    {"spring boot", "spring"},
-    {"git", "github", "gitlab"},
-    {"docker", "containerization"},
-    {"kubernetes", "k8s"},
-    {"aws", "amazon web services"},
-    {"gcp", "google cloud"},
-    {"azure", "microsoft azure"},
-    {"rest", "rest api", "restful"},
-    {"graphql", "gql"},
-    {"ci cd", "cicd", "continuous integration", "continuous delivery"},
-    {"microservices", "microservice architecture"},
-    {"oop", "object oriented programming"},
-    {"dsa", "data structures and algorithms"},
-    {"unit testing", "test automation", "automated testing"},
-    {"pytest", "py test"},
-    {"pandas", "python pandas"},
-    {"numpy", "python numpy"},
-    {"power bi", "powerbi", "bi dashboard"},
-    {"tableau", "tableau bi"},
-    {"excel", "ms excel", "microsoft excel"},
-    {"firebase", "firestore"},
-    {"adobe premiere pro", "premiere pro", "premiere"},
-    {"adobe photoshop", "photoshop", "ps"},
-    {"adobe illustrator", "illustrator", "ai design"},
-    {"after effects", "adobe after effects"},
-    {"figma", "ui ux", "ux ui", "user interface", "user experience"},
-    {"seo", "search engine optimization"},
-    {"sem", "search engine marketing"},
-    {"digital marketing", "social media marketing", "smm"},
-    {"content writing", "copywriting"},
-    {"sales", "business development", "bd"},
-    {"customer support", "customer service"},
-    {"crm", "customer relationship management"},
-    {"accounting", "bookkeeping", "accounts"},
-    {"recruitment", "talent acquisition", "hr"},
-    {"project management", "agile", "scrum"},
-    {"manual testing", "qa", "quality assurance"},
-    {"electrical", "electrical maintenance"},
-    {"autocad", "cad"},
-    {"nursing", "patient care"},
-    {"teaching", "tutoring", "home tutor"},
-    {"video editing", "video editor"},
-    {"graphic design", "graphics design"},
-    {"wordpress", "wp"},
-    {"shopify", "shopify development"},
-    {"laravel", "php laravel"},
-    {"react native", "rn"},
-    {"kotlin", "android kotlin"},
-    {"swift", "ios swift"},
-    {"redis", "redis cache"},
-    {"elasticsearch", "elastic search"},
-    {"fastapi", "python fastapi"},
-    {"flask", "python flask"},
-    {"django", "python django"},
-    {"next.js", "nextjs"},
-    {"express", "express.js", "expressjs"},
-    {"html", "html5"},
-    {"css", "css3", "scss"},
-    {"linux", "ubuntu", "unix"},
-]
-
-
-def build_synonym_map():
-    mapping = {}
-    for group in SKILL_SYNONYMS:
-        canonical = sorted(group)[0]
-        for variant in group:
-            mapping[variant] = canonical
-    return mapping
-
-
-SYNONYM_MAP = build_synonym_map()
-
-CORE_SKILLS = {
-    "python",
-    "java",
-    "javascript",
-    "typescript",
-    "c++",
-    "c#",
-    "sql",
-    "dart",
-    "flutter",
-    "react",
-    "node.js",
-    "spring boot",
-    "graphql",
-    "microservices",
-    "ci cd",
-    "unit testing",
-    "pytest",
-    "django",
-    "fastapi",
-    "flask",
-    "machine learning",
-    "deep learning",
-    "nlp",
-    "computer vision",
-    "ai",
-    "docker",
-    "kubernetes",
-    "aws",
-    "azure",
-    "gcp",
-    "mongodb",
-    "postgresql",
-    "git",
-    "rest api",
-    "tensorflow",
-    "pytorch",
-    "scikit-learn",
-    "pandas",
-    "numpy",
-    "power bi",
-    "tableau",
-    "go",
-    "kotlin",
-    "swift",
-    "php",
-    "ruby",
-    "scala",
-    "redis",
-    "firebase",
-    "firestore",
-    "android",
-    "ios",
-    "jetpack compose",
-    "selenium",
-    "jenkins",
-    "linux",
-    "bash",
-    "r",
-    "matlab",
-    "vue",
-    "angular",
-    "express",
-    "next.js",
-    "react native",
-    "wordpress",
-    "shopify",
-    "laravel",
-    "postgres",
-    "mysql",
-    "json",
-    "protobuf",
-    "oop",
-    "dsa",
-    "excel",
-    "project management",
-    "agile",
-    "scrum",
-    "manual testing",
-    "qa",
-    "seo",
-    "sem",
-    "digital marketing",
-    "smm",
-    "content writing",
-    "copywriting",
-    "sales",
-    "business development",
-    "customer support",
-    "customer service",
-    "crm",
-    "accounting",
-    "bookkeeping",
-    "recruitment",
-    "hr",
-    "graphic design",
-    "video editing",
-    "adobe photoshop",
-    "adobe illustrator",
-    "adobe premiere pro",
-    "after effects",
-    "figma",
-    "ui ux",
-    "autocad",
-    "electrical",
-    "nursing",
-    "patient care",
-    "teaching",
-    "tutoring",
-}
-
-SOFT_SKILLS = {
-    "leadership",
-    "communication",
-    "teamwork",
-    "collaboration",
-    "time management",
-    "critical thinking",
-    "active listening",
-    "problem solving",
-    "adaptability",
-    "presentation",
-}
-
-
 def skill_weight(skill):
     s = skill.lower()
     if s in CORE_SKILLS:
@@ -264,11 +56,29 @@ def skill_weight(skill):
 
 
 FIELD_RELEVANCE = {
-    "software": ["computer science", "cse", "software engineering", "it"],
-    "developer": ["computer science", "cse", "software engineering", "it"],
-    "engineer": ["computer science", "cse", "electrical", "mechanical", "civil"],
-    "data": ["computer science", "cse", "statistics", "mathematics"],
-    "ai": ["computer science", "cse", "mathematics", "statistics"],
+    "software": [
+        "computer science",
+        "cse",
+        "software engineering",
+        "it",
+        "mathematics",
+        "physics",
+        "electrical",
+        "electronics",
+    ],
+    "developer": ["computer science", "cse", "software engineering", "it", "mathematics", "physics"],
+    "engineer": [
+        "computer science",
+        "cse",
+        "electrical",
+        "mechanical",
+        "civil",
+        "electronics",
+        "mathematics",
+        "physics",
+    ],
+    "data": ["computer science", "cse", "statistics", "mathematics", "physics", "economics"],
+    "ai": ["computer science", "cse", "mathematics", "statistics", "physics", "electrical"],
     "web": ["computer science", "cse", "it"],
     "mobile": ["computer science", "cse", "it"],
     "android": ["computer science", "cse", "it"],
@@ -279,7 +89,7 @@ FIELD_RELEVANCE = {
     "devops": ["computer science", "cse", "it"],
     "network": ["computer science", "cse", "electrical", "it"],
     "business": ["business administration", "bba", "mba", "commerce"],
-    "finance": ["finance", "accounting", "business administration"],
+    "finance": ["finance", "accounting", "business administration", "economics"],
     "marketing": ["marketing", "business administration", "bba", "mba"],
     "account": ["accounting", "finance", "commerce"],
     "teacher": ["education", "english", "any discipline"],
@@ -296,7 +106,7 @@ def field_of_study_score(cv_education, job_title, job_desc):
             for field in fields:
                 if field in cv_fields:
                     return 1.0
-            return 0.2
+            return 0.4  # softened from 0.2 — many roles accept adjacent disciplines
     return 0.6
 
 
@@ -352,30 +162,12 @@ def get_degree_level(text):
 
 # ── SENIORITY ─────────────────────────────────────────────────────────────────
 
-SENIORITY_MAP = {
-    "intern": 0,
-    "trainee": 0,
-    "fresher": 0,
-    "junior": 1,
-    "jr": 1,
-    "associate": 2,
-    "executive": 2,
-    "officer": 2,
-    "senior": 3,
-    "sr": 3,
-    "lead": 4,
-    "manager": 4,
-    "head": 5,
-    "director": 5,
-    "gm": 5,
-}
-
 
 def detect_seniority(text):
-    text = text.lower()
+    text_lower = text.lower()
     best = -1
     for kw, lvl in SENIORITY_MAP.items():
-        if re.search(r"\b" + re.escape(kw) + r"\b", text):
+        if SENIORITY_PATTERNS[kw].search(text_lower):
             best = max(best, lvl)
     return best if best >= 0 else 2
 
@@ -440,22 +232,27 @@ def extract_skill_set(text):
 
 
 def extract_known_skills_from_text(text):
-    """Extract known skills from free-form text using curated dictionaries."""
+    """Extract known skills from free-form text using pre-compiled patterns."""
     if not text:
         return set()
     text_lower = text.lower()
     found = set()
-    for skill in CORE_SKILLS:
-        if re.search(r"\b" + re.escape(skill.lower()) + r"\b", text_lower):
+    for skill, pattern in CORE_SKILL_PATTERNS.items():
+        if pattern.search(text_lower):
             found.add(canonicalize(skill))
-    for variant in SYNONYM_MAP:
-        if re.search(r"\b" + re.escape(variant.lower()) + r"\b", text_lower):
-            found.add(canonicalize(variant))
+    for variant, pattern in SYNONYM_PATTERNS.items():
+        if pattern.search(text_lower):
+            found.add(SYNONYM_MAP.get(variant, variant))
     return found
 
 
 def get_job_skills(meta):
     """Get job skills from precomputed metadata."""
+    # Use pre-canonicalized skills from the index when available
+    pre_canon = meta.get("canonical_skills")
+    if pre_canon:
+        return set(pre_canon)
+
     structured = extract_skill_set(meta.get("skills_required", ""))
     from_desc = {canonicalize(s) for s in meta.get("extracted_skills", [])}
     combined = structured | from_desc
@@ -546,8 +343,8 @@ def extract_skills_from_experience(cv):
     skills = set()
     for e in entries:
         desc = e.get("description", "").lower()
-        for skill in CORE_SKILLS:
-            if re.search(r"\b" + re.escape(skill) + r"\b", desc):
+        for skill, pattern in CORE_SKILL_PATTERNS.items():
+            if pattern.search(desc):
                 skills.add(canonicalize(skill))
     return skills
 
@@ -560,12 +357,25 @@ def skill_score(cv_skills, job_skills, job_text="", semantic_hint=0.0):
     cv_set = extract_skill_set(", ".join(normalized_cv_skills))
     if not job_skills:
         return _inferred_skill_score_without_job_skills(cv_skills, job_text, semantic_hint)
+
+    # Coverage-based metric: what fraction of *job* requirements does the CV cover?
+    # This avoids penalizing candidates who have extra skills beyond the job posting.
     weighted_intersection = sum(skill_weight(s) for s in cv_set & job_skills)
-    weighted_union = sum(skill_weight(s) for s in cv_set | job_skills)
-    jaccard = weighted_intersection / weighted_union if weighted_union else 0.0
+    weighted_job_total = sum(skill_weight(s) for s in job_skills)
+    coverage = weighted_intersection / weighted_job_total if weighted_job_total else 0.0
+
+    # Partial matching bonus for substring overlap (e.g. "react" matches "react native")
     partial = sum(1 for cs in cv_set for js in job_skills if cs != js and (cs in js or js in cs))
     partial_bonus = min(partial / max(len(job_skills), 1), 0.2)
-    return min(jaccard + partial_bonus, 1.0)
+
+    # If no direct or partial overlap at all, return 0 — no free points
+    if coverage == 0.0 and partial_bonus == 0.0:
+        return 0.0
+
+    # Small breadth bonus — candidates with broader skill sets get a slight edge
+    breadth_bonus = min(len(cv_set) / 30, 0.1)
+
+    return min(coverage + partial_bonus + breadth_bonus, 1.0)
 
 
 def education_score(cv_education, job_edu_raw, job_title, job_desc):
@@ -596,23 +406,6 @@ def experience_score(cv_years, required_years):
     if cv_years >= required_years * 0.4:
         return 0.4
     return 0.1
-
-
-def title_score(cv, job_title, model):
-    if not job_title:
-        return 0.4
-    exp = cv.get("experience", [])
-    entries = exp if isinstance(exp, list) else exp.get("entries", [])
-    past_titles = [e.get("title", "") for e in entries if e.get("title", "").strip()]
-    if not past_titles:
-        return 0.4
-    job_emb = model.encode(job_title, convert_to_tensor=True)
-    scores = [
-        max(0.0, float(util.cos_sim(model.encode(t, convert_to_tensor=True), job_emb).item()))
-        for t in past_titles
-        if t.strip()
-    ]
-    return max(scores) if scores else 0.4
 
 
 def skill_source_score(cv_exp_skills, job_skills):
@@ -703,13 +496,12 @@ def build_title_scores(model, cv, job_metadata):
         return np.full(len(job_metadata), 0.4)
 
     cv_title_embs = model.encode(past_titles, normalize_embeddings=True, convert_to_numpy=True)
-    cv_title_vec = cv_title_embs.mean(axis=0)
-    norm = np.linalg.norm(cv_title_vec)
-    if norm == 0:
-        return np.full(len(job_metadata), 0.4)
 
-    cv_title_vec = cv_title_vec / norm
-    return np.clip(job_title_embs @ cv_title_vec, 0, 1)
+    # Use max-similarity instead of mean: picks the best-matching past title
+    # per job. This preserves signal for career-changers whose most recent role
+    # may differ significantly from earlier ones.
+    sim_matrix = job_title_embs @ cv_title_embs.T  # (N_jobs, N_cv_titles)
+    return np.clip(sim_matrix.max(axis=1), 0, 1)
 
 
 def score_jobs(cv, job_metadata, semantic_scores, title_scores_all, cv_level, cv_years, cv_exp_skills):
@@ -845,7 +637,6 @@ def match(cv_path, index_prefix, top_n=10, output_path=None):
     print(f"Scoring {len(job_metadata)} jobs...")
     results = score_jobs(cv, job_metadata, semantic_scores, title_scores_all, cv_level, cv_years, cv_exp_skills)
 
-    results.sort(key=lambda x: x["final_score"], reverse=True)
     top_results = results[:top_n]
 
     print(f"\n{'=' * 65}")
@@ -873,7 +664,7 @@ def match(cv_path, index_prefix, top_n=10, output_path=None):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="CV-Job Matcher v5 (indexed)")
+    parser = argparse.ArgumentParser(description="CV-Job Matcher v6 (indexed)")
     parser.add_argument("--cv", required=True, help="Parsed CV JSON path")
     parser.add_argument("--index", default="job_index", help="Index prefix from build_index.py")
     parser.add_argument("--top", type=int, default=10)

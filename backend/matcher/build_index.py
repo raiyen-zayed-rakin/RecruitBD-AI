@@ -19,87 +19,20 @@ from sentence_transformers import SentenceTransformer
 
 from config import DATA_DIR, INDEX_DIR
 from jobs.jobs import main as scrape_jobs
-
-CORE_SKILLS = {
-    "python",
-    "java",
-    "javascript",
-    "typescript",
-    "c++",
-    "c#",
-    "sql",
-    "dart",
-    "flutter",
-    "react",
-    "node.js",
-    "spring boot",
-    "django",
-    "fastapi",
-    "flask",
-    "machine learning",
-    "deep learning",
-    "nlp",
-    "computer vision",
-    "ai",
-    "docker",
-    "kubernetes",
-    "aws",
-    "azure",
-    "gcp",
-    "mongodb",
-    "postgresql",
-    "git",
-    "rest api",
-    "tensorflow",
-    "pytorch",
-    "scikit-learn",
-    "go",
-    "kotlin",
-    "swift",
-    "php",
-    "ruby",
-    "scala",
-    "redis",
-    "firebase",
-    "android",
-    "ios",
-    "jetpack compose",
-    "selenium",
-    "jenkins",
-    "linux",
-    "bash",
-    "r",
-    "matlab",
-    "vue",
-    "angular",
-    "express",
-    "next.js",
-}
-
-SENIORITY_MAP = {
-    "intern": 0,
-    "trainee": 0,
-    "fresher": 0,
-    "junior": 1,
-    "jr": 1,
-    "associate": 2,
-    "executive": 2,
-    "officer": 2,
-    "senior": 3,
-    "sr": 3,
-    "lead": 4,
-    "manager": 4,
-    "head": 5,
-    "director": 5,
-    "gm": 5,
-}
+from matcher.constants import (
+    CORE_SKILL_PATTERNS,
+    SENIORITY_MAP,
+    SENIORITY_PATTERNS,
+    SYNONYM_MAP,
+    build_synonym_map,
+)
 
 
 def detect_seniority(text):
-    text = text.lower()
+    text_lower = text.lower()
     best = -1
     for kw, lvl in SENIORITY_MAP.items():
-        if re.search(r"\b" + re.escape(kw) + r"\b", text):
+        if SENIORITY_PATTERNS[kw].search(text_lower):
             best = max(best, lvl)
     return best if best >= 0 else 2
 
@@ -109,10 +42,21 @@ def extract_skills_from_desc(text):
         return []
     text_lower = text.lower()
     found = []
-    for skill in CORE_SKILLS:
-        if re.search(r"\b" + re.escape(skill) + r"\b", text_lower):
+    for skill, pattern in CORE_SKILL_PATTERNS.items():
+        if pattern.search(text_lower):
             found.append(skill)
     return found
+
+
+def canonicalize(skill):
+    """Normalize a skill string to its canonical form."""
+    s = re.sub(r"[^a-z0-9\+\#\.]", " ", skill.lower()).strip()
+    return SYNONYM_MAP.get(s, s)
+
+
+def canonicalize_skills(skills):
+    """Return a deduplicated list of canonical skill strings."""
+    return list({canonicalize(s) for s in skills if s.strip()})
 
 
 def extract_required_years(job_desc, job_edu):
@@ -145,12 +89,12 @@ def build_job_text(job):
     return " ".join(p for p in parts if p.strip())
 
 
-def main(output_prefix: str = "job_index"):
+async def main(output_prefix: str = "job_index"):
     csv_files = list(DATA_DIR.glob("jobs_*.csv")) if DATA_DIR.exists() else []
 
     if not csv_files:
         print("No data found. Scraping job listings...")
-        asyncio.run(scrape_jobs())
+        await scrape_jobs()
         csv_files = list(DATA_DIR.glob("jobs_*.csv"))
 
     if not csv_files:
@@ -176,6 +120,8 @@ def main(output_prefix: str = "job_index"):
         job_add = job.get("additional_requirements", "")
         job_edu = job.get("education_requirements", "")
 
+        extracted = extract_skills_from_desc(job_desc + " " + job_add)
+
         meta = {
             "job_id": job.get("job_id"),
             "job_title": job_title,
@@ -189,9 +135,11 @@ def main(output_prefix: str = "job_index"):
             "education_requirements": job_edu,
             "job_description": job_desc[:800],
             # Pre-extracted fields
-            "extracted_skills": extract_skills_from_desc(job_desc + " " + job_add),
+            "extracted_skills": extracted,
             "required_years": extract_required_years(job_desc + " " + job_add, job_edu),
             "seniority_level": detect_seniority(job_title + " " + job_desc[:200]),
+            # Pre-canonicalized skills for fast lookup in cv_matcher
+            "canonical_skills": canonicalize_skills(extracted),
         }
         metadata.append(meta)
         texts.append(build_job_text(job))
@@ -222,4 +170,4 @@ def main(output_prefix: str = "job_index"):
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

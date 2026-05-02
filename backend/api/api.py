@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer
 
 from config import INDEX_DIR
-from jobs.build_index import main as build_index
+from matcher.build_index import main as build_index
 
 warnings.filterwarnings("ignore")
 
