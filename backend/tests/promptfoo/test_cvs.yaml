@@ -1,0 +1,114 @@
+- vars:
+    text: |
+      Fahim Hoque
+      House 41/1, Road 03, Kakinakuthi Road, DC mor, Rangpur 5400
+      Phone: +8801722317499
+      Email: fhoque.arnob@gmail.com
+      GitHub: github.com/fahimhoque
+      LinkedIn: linkedin.com/in/fahimhoquearnob
+      Technical Skills
+      Programming Languages: Dart, Java, TypeScript/JavaScript
+      Mobile Development: Flutter
+      Back-End: Node.js (TS/JS), Spring Boot, Go
+      Database & Storage: MySQL, PostgreSQL, Firestore, MongoDB
+      Cloud Services: Vercel, Firebase, Azure, Google Cloud Platform
+      Data Formats & Protocols: JSON, Protobuf, REST
+      Version Control: Git (GitHub, Bitbucket, GitLab)
+      Operating Systems: Windows, Linux, macOS
+      Experience
+      Software Engineer, Appents Sep 2024 – Present Remote
+      Appents is a unified social media management platform enabling content creation, scheduling, and
+      publishing across multiple social platforms from a single dashboard.
+      • Developed and maintained backend server infrastructure powering Appents’ AI-driven marketing fea
+      tures.
+      • Led development of MAIA, a Marketing AI Agent for automated campaign creation and execution.
+      Pinpost (Product of Appents)
+      Pinpost focuses on multi-platform content publishing, scheduling, and asset management.
+      • Integrated Google Protobuf across TypeScript (frontend/backend) and Go services, reducing API and
+      schema development time by 50%.
+      • Engineered time-related backend systems to ensure accurate multi-platform scheduling and publishing. •
+      Built and optimized notification flows for in-app and email channels.
+      Software Engineer, Jhotika Aug 2023 – Aug 2024 Remote
+      • Developed and maintained a travel companion mobile app with itinerary generation and trip planning.
+      • Managed full mobile lifecycle: architecture, development, testing, store deployment, and performance
+      optimization.
+      Software Engineer, AlgoMatrix May 2021 – Jul 2023 Dhaka, Bangladesh
+      • Built cross-platform mobile apps for Android and iOS using Flutter.
+      • Designed scalable architectures for native Android apps using Jetpack Compose. • Created onboarding
+      documentation and sample projects to reduce ramp-up time for new developers. • Led and mentored junior
+      developers and interns on high-priority Flutter-based projects.
+      Flutter Intern, AlgoMatrix Jan 2021 – Apr 2021 1
+      • Contributed reusable Flutter components and gained foundational experience in mobile development.
+      Intern, Igorox Media Corp Jan 2020 – Mar 2020 Remote
+      • Modernized a cloud-based social bookmarking platform by upgrading core backend logic from Python 1.x
+      to 2.x.
+      Education
+      American International University-Bangladesh (AIUB) 2017 – 2021 B.Sc. (Hons) in Computer Science and
+      Engineering
+  assert:
+    - type: is-json
+    - type: javascript
+      value: file://validate_schema.js
+
+- vars:
+    text: |
+      জীবনবৃত্তান্ত
+      ব্যক্তিগত তথ্য
+      নাম: মোঃ আব্দুল করিম
+      পিতার নাম: মোঃ আব্দুল হাকিম
+      মাতার নাম: মোছাঃ রহিমা খাতুন
+      স্থায়ী ঠিকানা: গ্রাম: পূর্বপাড়া, ডাকঘর: সদর, উপজেলা: দাউদকান্দি, জেলা: কুমিল্লা
+      বর্তমান ঠিকানা: মিরপুর, ঢাকা
+      মোবাইল: ০১৭১২-৩৪৫৬৭৮
+      ই-মেইল: abdulkarim.imam@example.com
+      জন্ম তারিখ: ১৫ মার্চ ১৯৮৮
+      জাতীয়তা: বাংলাদেশি
+      ধর্ম: ইসলাম
+      বৈবাহিক অবস্থা: বিবাহিত
+      ক্যারিয়ার উদ্দেশ্য
+      ইসলামের সঠিক শিক্ষা প্রচার, মসজিদের ইমামতি ও খতিবের দায়িত্ব যথাযথভাবে পালন এবং সমাজে নৈতিক ও ধর্মীয় মূল্যবোধ প্রতিষ্ঠার লক্ষ্যে নিষ্ঠার সাথে কাজ করতে আগ্রহী।
+      শিক্ষাগত যোগ্যতা
+      কর্ম অভিজ্ঞতা
+      ইমাম ও খতিব
+      বায়তুল নূর জামে মসজিদ, ঢাকা
+      সময়কাল: ২০১৫ – বর্তমান
+      পাঁচ ওয়াক্ত নামাজে ইমামতি পরিচালনা
+      জুমার খুতবা প্রদান
+      কুরআন ও হাদিস শিক্ষা প্রদান
+      শিশু ও কিশোরদের নূরানি ও কুরআন শিক্ষা
+      সামাজিক ও পারিবারিক ইসলামী পরামর্শ প্রদান
+      সহকারী শিক্ষক (ইসলামিক স্টাডিজ)
+      আল-হেরা মাদ্রাসা, কুমিল্লা
+      সময়কাল: ২০১২ – ২০১৫
+      আরবি ও ইসলামিক স্টাডিজ বিষয় পাঠদান
+      শিক্ষার্থীদের কিরাত ও তাজবিদ প্রশিক্ষণ
+      বিভিন্ন ধর্মীয় অনুষ্ঠানে বক্তব্য প্রদান
+      বিশেষ দক্ষতা
+      শুদ্ধ কুরআন তিলাওয়াত ও তাজবিদ
+      আরবি, বাংলা ও উর্দু ভাষায় দক্ষতা
+      ইসলামিক বক্তৃতা ও ওয়াজ মাহফিল পরিচালনা
+      মসজিদ পরিচালনা ও ধর্মীয় কার্যক্রম সমন্বয়
+      কম্পিউটারের মৌলিক জ্ঞান (MS Word, Internet Browsing)
+      ব্যক্তিগত গুণাবলি
+      সৎ ও দায়িত্বশীল
+      নম্র ও বিনয়ী
+      সময়ানুবর্তী
+      সমাজসেবামূলক কাজে আগ্রহী
+      রেফারেন্স
+      মাওলানা মোঃ হাবিবুর রহমান
+      মুহাদ্দিস, জামিয়া ইসলামিয়া আরাবিয়া
+      হাজী মোঃ সাইফুল ইসলাম
+      সভাপতি, বায়তুল নূর জামে মসজিদ
+      ঘোষণা
+      আমি ঘোষণা করছি যে, উপরোক্ত তথ্যসমূহ আমার জানা মতে সঠিক ও সত্য।
+      স্বাক্ষর
+      (মোঃ আব্দুল করিম)
+      পরীক্ষার নাম | প্রতিষ্ঠান | বোর্ড/মাদ্রাসা | ফলাফল | পাসের সাল
+      দাওরায়ে হাদিস (মাস্টার্স সমমান) | জামিয়া ইসলামিয়া আরাবিয়া | বেফাক | মুমতায | ২০১২
+      ফাযিল | ইসলামিক ফাউন্ডেশন মাদ্রাসা | ইসলামি বিশ্ববিদ্যালয় | ১ম বিভাগ | ২০০৯
+      আলিম | স্থানীয় কামিল মাদ্রাসা | মাদ্রাসা বোর্ড | জিপিএ ৪.৫০ | ২০০৬
+      দাখিল | স্থানীয় দাখিল মাদ্রাসা | মাদ্রাসা বোর্ড | জিপিএ ৪.৬৩ | ২০০৪
+  assert:
+    - type: is-json
+    - type: javascript
+      value: file://validate_schema.js

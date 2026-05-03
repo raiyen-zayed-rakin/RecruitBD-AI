@@ -1,0 +1,29 @@
+description: "CV Parsing JSON Extraction Evaluation"
+
+prompts:
+  - prompt.txt
+
+providers:
+  # Test with Gemini (needs GOOGLE_API_KEY env var)
+  - id: google:gemini-2.5-flash
+    config:
+      temperature: 0
+      response_mime_type: "application/json"
+
+  # Test with local Ollama
+  - id: ollama:chat:gemma3
+    config:
+      temperature: 0
+      format: json
+      options:
+        # num_ctx: 2048
+    transform: "output.replace(/```(?:json)?/gi, '').trim()"
+  - id: ollama:chat:llama3.1
+    config:
+      temperature: 0
+      format: json
+      options:
+        # num_ctx: 2048
+    transform: "output.replace(/```(?:json)?/gi, '').trim()"
+
+tests: test_cvs.yaml
