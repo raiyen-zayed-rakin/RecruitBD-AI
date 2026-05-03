@@ -17,7 +17,7 @@ import re
 import warnings
 
 import numpy as np
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 
 from matcher.constants import (
     CORE_SKILL_PATTERNS,
@@ -318,13 +318,13 @@ def _inferred_skill_score_without_job_skills(cv_skills, job_text, semantic_hint=
     return float(np.clip(inferred, 0.05, 0.95))
 
 
-def synthesize_cv_summary(cv):
+def synthesize_cv_summary(cv) -> str:
+    parts = []
     summary = cv.get("summary", "").strip()
     if summary:
-        return summary
+        parts.append(summary)
     exp = cv.get("experience", [])
     entries = exp if isinstance(exp, list) else exp.get("entries", [])
-    parts = []
     for e in entries[:3]:
         title = e.get("title", "")
         company = e.get("company", "")
