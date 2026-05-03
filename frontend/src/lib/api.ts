@@ -1,6 +1,6 @@
 import type { CVData, JobMatch } from "@/lib/types";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URI || "http://localhost:8000";
 
 export async function parseCV(file: File): Promise<CVData> {
   const formData = new FormData();
