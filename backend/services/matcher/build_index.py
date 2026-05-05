@@ -17,14 +17,13 @@ import re
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from config import DATA_DIR, INDEX_DIR
-from jobs.jobs import main as scrape_jobs
-from matcher.constants import (
+from core.config import DATA_DIR, INDEX_DIR
+from services import scrape_jobs
+from .constants import (
     CORE_SKILL_PATTERNS,
     SENIORITY_MAP,
     SENIORITY_PATTERNS,
     SYNONYM_MAP,
-    build_synonym_map,
 )
 
 

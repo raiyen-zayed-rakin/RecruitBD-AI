@@ -1,3 +1,4 @@
+from typing import Any
 import json
 import os
 import sys
@@ -73,7 +74,7 @@ CV TEXT:
 """
 
 
-def extract_text(filepath):
+def extract_text(filepath) -> str | None:
     """Extract text from PDF or DOCX files."""
     if filepath.endswith(".pdf"):
         with pdfplumber.open(filepath) as pdf:
@@ -103,7 +104,7 @@ def extract_text(filepath):
         return None
 
 
-def parse_cv_ollama(text) -> dict:
+def parse_cv_ollama(text) -> dict[str, Any]:
     """Parse CV text into structured JSON according to the defined schema using Ollama."""
     prompt = PROMPT_TEMPLATE.format(text=text)
 
@@ -136,7 +137,7 @@ def parse_cv_ollama(text) -> dict:
     return json.loads(raw.strip())
 
 
-def parse_cv_genai(text) -> dict:
+def parse_cv_genai(text) -> dict[str, Any]:
     """Parse CV text using GenAI's structured output capabilities."""
     prompt = PROMPT_TEMPLATE.format(text=text)
     client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -153,7 +154,7 @@ def parse_cv_genai(text) -> dict:
     return json.loads(raw.strip())
 
 
-def parse_cv(text) -> dict:
+def parse_cv(text) -> dict[str, Any]:
     """Parse CV text into structured JSON. Uses GenAI if GOOGLE_API_KEY is set, otherwise Ollama."""
     if os.getenv("GOOGLE_API_KEY"):
         return parse_cv_genai(text)

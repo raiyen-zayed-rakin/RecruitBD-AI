@@ -15,11 +15,12 @@ import argparse
 import json
 import re
 import warnings
+from typing import Any
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from matcher.constants import (
+from .constants import (
     CORE_SKILL_PATTERNS,
     CORE_SKILLS,
     SENIORITY_MAP,
@@ -579,7 +580,7 @@ def match_cv_dict(
     job_metadata: list,
     model,
     top_n: int = 10,
-) -> list:
+) -> list[dict[str, Any]]:
     """
     Match a pre-parsed CV dict against preloaded job index.
     Called by the FastAPI server — model/index already in memory.

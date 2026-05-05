@@ -2,7 +2,7 @@ import asyncio
 import csv
 from datetime import datetime
 
-from config import DATA_DIR
+from core.config import DATA_DIR
 
 import aiohttp
 from bs4 import BeautifulSoup
