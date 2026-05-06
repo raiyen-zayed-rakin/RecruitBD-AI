@@ -1,16 +1,13 @@
-from typing import Any
 import json
 import os
 import sys
+from typing import Any
 
 import docx
 import pdfplumber
 from google import genai
 from google.genai import types
 from ollama import chat
-from dotenv import load_dotenv
-
-load_dotenv()
 
 PROMPT_TEMPLATE = """
 You are a strict JSON generator. Your task is to extract information from a CV.
@@ -20,7 +17,7 @@ RULES (MUST FOLLOW):
 - Do NOT add any fields that are not in the schema.
 - Do NOT rename fields.
 - Do NOT infer or guess missing information.
-- If a field is missing, use:
+- If a field is missing:
   - "" for strings
   - [] for arrays
 - Keep extracted text concise and factual.
@@ -38,6 +35,7 @@ SCHEMA:
   "skills": [],
   "experience": [
     {{
+      "type": "work | project",
       "title": "",
       "company": "",
       "start_date": "",
@@ -59,15 +57,60 @@ SCHEMA:
 }}
 
 EXTRACTION INSTRUCTIONS:
+
+GENERAL:
 - Extract exactly what is written in the CV.
-- For experience:
-  - One object per role.
-- For education:
-  - One object per degree.
-- For skills:
-  - Extract explicit skills only (no assumptions).
-- If no experience exist, return empty list [].
-- If experience is a project, keep company as empty string and title as project name.
+- Do NOT assume missing data.
+- If unsure, leave empty.
+
+EXPERIENCE:
+- Include all work-related and project-related items under "experience".
+- Each item must be a separate object.
+- Use the "type" field to classify entries.
+
+VALID TYPES:
+- "work"
+- "project"
+
+WORK RULES:
+- Use type = "work" for:
+  - jobs
+  - internships
+  - freelance work
+  - research assistant roles
+  - teaching assistant roles
+
+PROJECT RULES:
+- Use type = "project" for:
+  - personal projects
+  - academic projects
+  - portfolio projects
+  - GitHub projects
+  - hackathon projects
+
+- If unclear whether something is work or project:
+  - classify it as "project"
+
+- Projects may not have company names.
+- If company is missing, use "".
+- If no experience exists, return [].
+
+DESCRIPTION RULES:
+- "description" must be a single concise string.
+- Combine multiple bullet points into one readable sentence if necessary.
+- Do NOT return an array.
+
+TECH RULES:
+- Extract only explicitly mentioned technologies.
+- Do NOT infer technologies or skills.
+
+EDUCATION:
+- One object per degree.
+
+SKILLS:
+- Extract only explicitly written skills.
+- No inference.
+
 
 CV TEXT:
 {text}
@@ -120,7 +163,7 @@ def parse_cv_ollama(text) -> dict[str, Any]:
         format="json",
         think=False,
         options={
-            "num_ctx": 2048,
+            "num_ctx": 4096,
             "temperature": 0,
             "top_p": 1,
             "top_k": 1,
