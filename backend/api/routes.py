@@ -68,8 +68,12 @@ async def match_jobs(
 @router.get("/health")
 async def health(request: Request) -> dict[str, Any]:
     """Health check endpoint to verify the service is running and dependencies are loaded."""
+    model = getattr(request.app.state, "model", None)
+    job_metadata = getattr(request.app.state, "job_metadata", None)
+    ready = getattr(request.app.state, "ready", False)
     return {
         "status": "ok",
-        "jobs_loaded": len(request.app.state.job_metadata) if request.app.state.job_metadata else 0,
-        "model_loaded": request.app.state.model is not None,
+        "model_loaded": model is not None,
+        "jobs_indexed": len(job_metadata) if job_metadata else 0,
+        "ready": ready,
     }
