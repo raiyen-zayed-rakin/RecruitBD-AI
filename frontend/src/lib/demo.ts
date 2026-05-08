@@ -24,6 +24,7 @@ export const DEMO_CV: CVData = {
   ],
   experience: [
     {
+      type: "work",
       title: "Software Engineer",
       company: "TechCorp BD",
       startDate: "2022-01",
@@ -33,6 +34,7 @@ export const DEMO_CV: CVData = {
       tech: [],
     },
     {
+      type: "work",
       title: "Junior Developer",
       company: "Startup XYZ",
       startDate: "2021-01",

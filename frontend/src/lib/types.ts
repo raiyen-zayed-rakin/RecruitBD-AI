@@ -53,8 +53,9 @@ export interface ScoreBreakdown {
 
 export interface Health {
   status: "ok" | "error";
-  jobs_loaded: number;
   model_loaded: boolean;
+  jobs_indexed: number;
+  ready: boolean;
 }
 
 // Define typescript interface for the application state

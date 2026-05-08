@@ -67,7 +67,7 @@ export default function App() {
       clearTimer();
       dispatch({
         type: "SET_UPLOAD_ERROR",
-        payload: `Parse failed: ${(err as Error).message}. Make sure the FastAPI server is running.`,
+        payload: `Parse failed: ${(err as Error).message}.`,
       });
     }
   }, [state.isDemo, state.file, runStepAnim]);
@@ -91,7 +91,7 @@ export default function App() {
       clearTimer();
       dispatch({
         type: "MATCH_ERROR",
-        payload: `Match failed: ${(err as Error).message}. Make sure the FastAPI server is running.`,
+        payload: `Match failed: ${(err as Error).message}.`,
       });
     }
   }, [state.isDemo, state.cvData, state.topN, runStepAnim]);

@@ -167,8 +167,8 @@ function StatCards({
 }
 
 const sortItems = [
-  { label: "Match score", value: "score" },
-  { label: "Skill match", value: "skill" },
+  { label: "Match Score", value: "score" },
+  { label: "Skill", value: "skill" },
   { label: "Experience", value: "exp" },
   { label: "Education", value: "edu" },
 ];
