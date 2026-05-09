@@ -1,11 +1,10 @@
 import asyncio
 import json
 import logging
-from typing import Callable
 
 import numpy as np
 import torch
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer
@@ -23,28 +22,35 @@ META_PATH = INDEX_DIR / "job_index_metadata.json"
 async def _load_resources(app: FastAPI):
     """Helper function to load the SBERT model and job index into memory."""
     try:
-        print("Loading SBERT model...")
+        print("Loading resources...")
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"Using device: {device}")
 
-        loop = asyncio.get_running_loop()
-
         # SentenceTransformer is CPU-bound, run in thread pool so the event loop stays responsive
-        app.state.model = await loop.run_in_executor(None, lambda: SentenceTransformer(SBERT_MODEL, device=device))
+        model_task = asyncio.to_thread(lambda: SentenceTransformer(SBERT_MODEL, device=device))
 
-        print("Loading job index embeddings...")
-        app.state.job_embeddings = await loop.run_in_executor(None, lambda: np.load(EMB_PATH, mmap_mode="r"))
+        embeddings = asyncio.to_thread(np.load, EMB_PATH, mmap_mode="r")
 
-        print("Loading job index metadata...")
-        with open(META_PATH, "r", encoding="utf-8") as f:
-            app.state.job_metadata = json.load(f)
+        metadata_task = asyncio.to_thread(_load_metadata)
+
+        (
+            app.state.model,
+            app.state.job_embeddings,
+            app.state.job_metadata,
+        ) = await asyncio.gather(model_task, embeddings, metadata_task)
 
         app.state.ready = True
-        print("Resources loaded successfully, API is ready to serve requests.")
+        print("Resources loaded successfully.")
     except Exception:
         logging.exception("Failed to load resources during startup")
         app.state.ready = False
+
+
+def _load_metadata() -> list[dict]:
+    """Helper function to load job metadata from disk."""
+    with open(META_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 @asynccontextmanager
@@ -59,7 +65,7 @@ async def lifespan(app: FastAPI):
     if not EMB_PATH.exists() or not META_PATH.exists():
         logging.warning("Index files not found, running initial scrape and index build...")
     else:
-        asyncio.create_task(_load_resources(app))
+        await _load_resources(app)
 
     yield
 
@@ -73,13 +79,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def check_ready(request: Request, call_next: Callable):
-    if not request.url.path == "/health" and not request.app.state.ready:
-        raise HTTPException(status_code=503, detail="Service is initializing, please try again shortly.")
-    return await call_next(request)
-
 
 app.include_router(router)
