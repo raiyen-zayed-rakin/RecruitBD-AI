@@ -18,7 +18,6 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from core.config import DATA_DIR, INDEX_DIR, SBERT_MODEL
-from services import scrape_jobs
 
 from .constants import (
     CORE_SKILL_PATTERNS,
@@ -90,17 +89,16 @@ def build_job_text(job):
 
 
 async def main(output_prefix: str = "job_index"):
-    csv_files = list(DATA_DIR.glob("jobs_*.csv")) if DATA_DIR.exists() else []
+    jobs_path = DATA_DIR / "jobs.csv"
 
-    if not csv_files:
-        print("No data found. Scraping job listings...")
+    if not jobs_path.exists():
+        from services import scrape_jobs
+
+        print("Jobs CSV not found. Running scraper to fetch jobs...")
         await scrape_jobs()
-        csv_files = list(DATA_DIR.glob("jobs_*.csv"))
 
-    if not csv_files:
-        raise FileNotFoundError("Scraping completed but no CSV found in data/")
-
-    jobs_path = max(csv_files, key=lambda f: f.stat().st_mtime)
+    if not jobs_path.exists():
+        return FileNotFoundError(f"Jobs CSV not found at {jobs_path}")
 
     with open(jobs_path, "r", encoding="utf-8") as f:
         jobs = list(csv.DictReader(f))

@@ -1,12 +1,11 @@
 import asyncio
 import csv
-from datetime import datetime
-
-from core.config import DATA_DIR
 
 import aiohttp
 from bs4 import BeautifulSoup
 from tqdm.asyncio import tqdm
+
+from core.config import DATA_DIR
 
 JOB_LIST_URL = "https://gateway.bdjobs.com/recruitment-account-test/api/JobSearch/GetJobSearch"
 JOB_DETAIL_URL = "https://gateway.bdjobs.com/ActtivejobsTest/api/JobSubsystem/jobDetails"
@@ -114,9 +113,8 @@ async def main():
     retry_ids = []
 
     conn = aiohttp.TCPConnector(limit=10)
-    session = aiohttp.ClientSession(connector=conn)
 
-    try:
+    async with aiohttp.ClientSession(connector=conn) as session:
         initial = await fetch_json(session, JOB_LIST_URL)
 
         if not initial or initial.get("statuscode") != "1":
@@ -156,11 +154,8 @@ async def main():
             jobs_data.extend([detail for detail in details if detail])
             max_retries -= 1
 
-        now = datetime.now()
-        timestamp = int(now.timestamp())
-
         DATA_DIR.mkdir(exist_ok=True)
-        csv_file = DATA_DIR / f"jobs_{timestamp}.csv"
+        csv_file = DATA_DIR / "jobs.csv"
 
         fieldnames = sorted(all_fields)
 
@@ -171,8 +166,6 @@ async def main():
                 writer.writerow(job)
 
         print(f"Scraped {len(jobs_data)} jobs")
-    finally:
-        await session.close()
 
 
 if __name__ == "__main__":
